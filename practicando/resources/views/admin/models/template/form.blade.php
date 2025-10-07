@@ -2,19 +2,11 @@
     <div class="col-8">
         <div class="form-group">
             {!! Form::label('name', 'Nombre') !!}
-            {!! Form::text('name', null, ['class' => 'form-control', 'placeholder' => 'Nombre del vehículo', 'required']) !!}
+            {!! Form::text('name', null, ['class' => 'form-control', 'placeholder' => 'Nombre del modelo', 'required']) !!}
         </div>
         <div class="form-group">
             {!! Form::label('brand', 'Marca') !!}
             {!! Form::select('brand_id', $brands, null, ['class' => 'form-control', 'placeholder' => 'Seleccione una marca', 'required']) !!}
-        </div>
-        <div class="form-group">
-            {!! Form::label('model', 'Modelo') !!}
-            {!! Form::select('model_id', $models, null, ['class' => 'form-control', 'placeholder' => 'Seleccione un modelo', 'required']) !!}
-        </div>
-        <div class="form-group">
-            {!! Form::label('year', 'Año') !!}
-            {!! Form::number('year', null, ['class' => 'form-control', 'placeholder' => 'Año del vehículo', 'required']) !!}
         </div>
         <div class="form-group">
             {!! Form::label('description', 'Descripción') !!}

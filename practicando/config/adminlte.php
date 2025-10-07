@@ -339,9 +339,9 @@ return [
             'icon' => 'fas fa-fw fa-tags',
         ],
         [
-            'text' => 'change_password',
-            'url' => 'admin/settings',
-            'icon' => 'fas fa-fw fa-lock',
+            'text' => 'Modelos',
+            'route' => 'admin.models.index',
+            'icon' => 'fas fa-fw fa-copyright',
         ],
         [
             'text' => 'multilevel',

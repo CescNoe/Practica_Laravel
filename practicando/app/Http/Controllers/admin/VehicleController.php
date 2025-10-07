@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
 use App\Models\Brand;
+use App\Models\Model_Brand;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -16,18 +17,20 @@ class VehicleController extends Controller
      */
     public function index(Request $request)
     {
-        
+
         // Consulta 
         $vehicles = Vehicle::select(
             'vehicles.id',
             'vehicles.name',
             'b.name as brand',
-            'vehicles.model',
+            'm.name as model',
             'vehicles.year',
             'vehicles.description',
             'vehicles.created_at',
             'vehicles.updated_at'
-        ) -> join ('brands as b', 'vehicles.brand_id', '=', 'b.id');
+        )
+            ->join('model_brands as m', 'vehicles.model_id', '=', 'm.id')
+            ->join('brands as b', 'm.brand_id', '=', 'b.id');
 
         if ($request->ajax()) {
             return DataTables::of($vehicles)
@@ -57,7 +60,8 @@ class VehicleController extends Controller
     public function create()
     {
         $brands = Brand::all()->pluck('name', 'id');
-        return view('admin.vehicles.create', compact('brands'));
+        $models = Model_Brand::all()->pluck('name', 'id');
+        return view('admin.vehicles.create', compact('brands', 'models'));
     }
 
     /**
@@ -68,14 +72,15 @@ class VehicleController extends Controller
         try {
             $request->validate([
                 'name' => 'required|unique:vehicles|string|max:255',
-                'model' => 'required|string|max:255',
+                'brand_id' => 'required|exists:brands,id',
+                'model_id' => 'required|exists:model_brands,id',
                 'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'description' => 'nullable|string',
             ]);
             Vehicle::create([
                 'name' => $request->name,
                 'brand_id' => $request->brand_id,
-                'model' => $request->model,
+                'model_id' => $request->model_id,
                 'year' => $request->year,
                 'description' => $request->description,
             ]);
@@ -100,7 +105,8 @@ class VehicleController extends Controller
     {
         $vehicle = Vehicle::find($id);
         $brands = Brand::all()->pluck('name', 'id');
-        return view('admin.vehicles.edit', compact('vehicle', 'brands'));
+        $models = Model_Brand::all()->pluck('name', 'id');
+        return view('admin.vehicles.edit', compact('vehicle', 'brands', 'models'));
     }
 
     /**
@@ -113,14 +119,14 @@ class VehicleController extends Controller
             $request->validate([
                 'name' => 'unique:vehicles,name,' . $vehicle->id . '|string|max:255',
                 'brand_id' => 'exists:brands,id',
-                'model' => 'string|max:255',
+                'model_id' => 'exists:model_brands,id',
                 'year' => 'integer|min:1900|max:' . (date('Y') + 1),
                 'description' => 'nullable|string',
             ]);
             $vehicle->update([
                 'name' => $request->name,
                 'brand_id' => $request->brand_id,
-                'model' => $request->model,
+                'model_id' => $request->model_id,
                 'year' => $request->year,
                 'description' => $request->description,
             ]);
@@ -135,12 +141,19 @@ class VehicleController extends Controller
      */
     public function destroy(string $id)
     {
-        try{
+        try {
             $vehicle = Vehicle::find($id);
             $vehicle->delete();
             return redirect()->route('admin.vehicles.index')->with('action', 'Vehículo eliminado correctamente.');
-        } catch (Throwable $e){
+        } catch (Throwable $e) {
             return redirect()->route('admin.vehicles.index')->with('error', 'Error al eliminar el vehículo.');
         }
+    }
+
+    // Se agrega para obtener los modelos según la marca seleccionada
+    public function getModelsByBrand($brand_id)
+    {
+        $models = Model_Brand::where('brand_id', $brand_id)->get();
+        return response()->json($models);
     }
 }

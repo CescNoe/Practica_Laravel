@@ -1,23 +1,21 @@
 @extends('adminlte::page')
 
-@section('title', 'Vehículos')
+@section('title', 'Modelos de Vehículos')
 
 @section('content_header')
-    <h1>Lista de Vehículos</h1>
+    <h1>Lista de Modelos de Vehículos</h1>
 @stop
 
 @section('content')
     <div class="card">
         <div class="card-header">
-            <button class="btn btn-primary" id="btnRegistrar">Agregar vehículo</button>
+            <button class="btn btn-primary" id="btnRegistrar">Agregar modelo</button>
             <div class="card-body">
                 <table class="table table-striped" id="table">
                     <thead>
                         <tr>
                             <th>Nombre</th>
                             <th>Marca</th>
-                            <th>Modelo</th>
-                            <th>Año</th>
                             <th>Descripción</th>
                             <th>Fecha Creación</th>
                             <th>Fecha Actualización</th>
@@ -26,22 +24,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($vehicles as $vehicle)
+                        @foreach ($models as $model)
                             <tr>
-                                <td>{{ $vehicle->name }}</td>
-                                <td>{{ $vehicle->brand }}</td>
-                                <td>{{ $vehicle->model }}</td>
-                                <td>{{ $vehicle->year }}</td>
-                                <td>{{ $vehicle->description }}</td>
-                                <td>{{ $vehicle->created_at }}</td>
-                                <td>{{ $vehicle->updated_at }}</td>
+                                <td>{{ $model->name }}</td>
+                                <td>{{ $model->brand }}</td>
+                                <td>{{ $model->description }}</td>
+                                <td>{{ $model->created_at }}</td>
+                                <td>{{ $model->updated_at }}</td>
                                 <td>
-                                    <button class="btn btn-primary btn-sm btnEditar" id="{{ $vehicle->id }}">
+                                    <button class="btn btn-primary btn-sm btnEditar" id="{{ $model->id }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </td>
                                 <td>
-                                    <form action="{{ route('admin.vehicles.destroy', $vehicle) }}" method="POST"
+                                    <form action="{{ route('admin.models.destroy', $model) }}" method="POST"
                                         class="frmDelete">
                                         @csrf
                                         @method('DELETE')
@@ -60,7 +56,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalLabel">Formulario de Vehículos</h5>
+                    <h5 class="modal-title" id="modalLabel">Formulario de Modelos</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -74,55 +70,55 @@
 @stop
 
 @section('js')
-    <script>
-        $(document).on('click', '.frmDelete', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "¡No podrás revertir esto!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, eliminarlo!',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: form.attr('action'),
-                        type: form.attr('method'),
-                        data: form.serialize(),
-                        success: function(response) {
-                            refreshTable();
-                            Swal.fire({
-                                title: '¡Eliminado!',
-                                text: 'El vehículo ha sido eliminado.',
-                                icon: 'success',
-                                draggable: true
-                            });
-                        },
-                        error: function(response) {
-                            var error = response.responseJSON;
-                            Swal.fire({
-                                title: 'Error',
-                                text: error.message,
-                                icon: 'error',
-                                draggable: true
-                            });
-                        }
-                    });
-                }
-            })
-        });
+<script>
+    $(document).on('click', '.frmDelete', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esto!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminarlo!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function(response) {
+                        refreshTable();
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: 'El modelo ha sido eliminado.',
+                            icon: 'success',
+                            draggable: true
+                        });
+                    },
+                    error: function(response) {
+                        var error = response.responseJSON;
+                        Swal.fire({
+                            title: 'Error',
+                            text: error.message,
+                            icon: 'error',
+                            draggable: true
+                        });
+                    }
+                });
+            }
+        })
+    });
 
-        $('#btnRegistrar').click(function() {
+    $('#btnRegistrar').click(function() {
             $.ajax({
-                url: "{{ route('admin.vehicles.create') }}",
+                url: "{{ route('admin.models.create') }}",
                 type: "GET",
                 success: function(response) {
                     $('#modal .modal-body').html(response);
-                    $('#modal .modal-title').html("Nuevo vehículo");
+                    $('#modal .modal-title').html("Nuevo modelo");
                     $('#modal').modal('show');
                     $('#modal form').on('submit', function(e) {
                         e.preventDefault();
@@ -164,11 +160,11 @@
         $(document).on('click', '.btnEditar', function() {
             var id = $(this).attr('id');
             $.ajax({
-                url: "{{ route('admin.vehicles.edit', 'id') }}".replace('id', id),
+                url: "{{ route('admin.models.edit', 'id') }}".replace('id', id),
                 type: "GET",
                 success: function(response) {
                     $('#modal .modal-body').html(response);
-                    $('#modal .modal-title').html("Editar vehículo");
+                    $('#modal .modal-title').html("Editar modelo");
                     $('#modal').modal('show');
                     $('#modal form').on('submit', function(e) {
                         e.preventDefault();
@@ -209,15 +205,11 @@
 
         $(document).ready(function() {
             $('#table').DataTable({
-                "ajax": "{{ route('admin.vehicles.index') }}",
+                "ajax": "{{ route('admin.models.index') }}",
                 "columns": [{
                     "data": "name",
                 }, {
                     "data": "brand",
-                }, {
-                    "data": "model",
-                }, {
-                    "data": "year",
                 }, {
                     "data": "description",
                 }, {
@@ -243,33 +235,5 @@
             var table = $("#table").DataTable();
             table.ajax.reload(null, false)
         }
-
-        // Función para cargar modelos dinámicamente según la marca seleccionada
-        $(document).on('change', 'select[name="brand_id"]', function() {
-            let brandId = $(this).val();
-            let modelSelect = $('select[name="model_id"]');
-            modelSelect.html('<option>Cargando modelos...</option>');
-
-            if (brandId) {
-                $.ajax({
-                    url: "{{ url('/admin/vehicles/models') }}/" + brandId,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        let options = '<option value="">Seleccione un modelo</option>';
-                        $.each(data, function(key, model) {
-                            options += '<option value="' + model.id + '">' + model.name + '</option>';
-                        });
-                        modelSelect.html(options);
-                    },
-                    error: function() {
-                        modelSelect.html('<option>Error al cargar modelos</option>');
-                        console.log('Error al cargar los modelos');
-                    }
-                });
-            } else {
-                modelSelect.html('<option value="">Seleccione una marca primero</option>');
-            }
-        });
-    </script>
+</script>
 @stop
