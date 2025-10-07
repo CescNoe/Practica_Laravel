@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('brand');
+            $table->string('name', 100);
+            $table->unsignedBigInteger('brand_id');
+            $table->foreign('brand_id')->references('id')->on('brands');
             $table->string('model');
             $table->integer('year');
             $table->text('description')->nullable();

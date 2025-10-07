@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
+use App\Models\Brand;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,7 +16,19 @@ class VehicleController extends Controller
      */
     public function index(Request $request)
     {
-        $vehicles = Vehicle::all();
+        
+        // Consulta 
+        $vehicles = Vehicle::select(
+            'vehicles.id',
+            'vehicles.name',
+            'b.name as brand',
+            'vehicles.model',
+            'vehicles.year',
+            'vehicles.description',
+            'vehicles.created_at',
+            'vehicles.updated_at'
+        ) -> join ('brands as b', 'vehicles.brand_id', '=', 'b.id');
+
         if ($request->ajax()) {
             return DataTables::of($vehicles)
                 ->addColumn("edit", function ($vehicle) {
@@ -43,7 +56,8 @@ class VehicleController extends Controller
      */
     public function create()
     {
-        return view('admin.vehicles.create');
+        $brands = Brand::all()->pluck('name', 'id');
+        return view('admin.vehicles.create', compact('brands'));
     }
 
     /**
@@ -54,14 +68,13 @@ class VehicleController extends Controller
         try {
             $request->validate([
                 'name' => 'required|unique:vehicles|string|max:255',
-                'brand' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
                 'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
                 'description' => 'nullable|string',
             ]);
             Vehicle::create([
                 'name' => $request->name,
-                'brand' => $request->brand,
+                'brand_id' => $request->brand_id,
                 'model' => $request->model,
                 'year' => $request->year,
                 'description' => $request->description,
@@ -86,7 +99,8 @@ class VehicleController extends Controller
     public function edit(string $id)
     {
         $vehicle = Vehicle::find($id);
-        return view('admin.vehicles.edit', compact('vehicle'));
+        $brands = Brand::all()->pluck('name', 'id');
+        return view('admin.vehicles.edit', compact('vehicle', 'brands'));
     }
 
     /**
@@ -98,14 +112,14 @@ class VehicleController extends Controller
             $vehicle = Vehicle::find($id);
             $request->validate([
                 'name' => 'unique:vehicles,name,' . $vehicle->id . '|string|max:255',
-                'brand' => 'string|max:255',
+                'brand_id' => 'exists:brands,id',
                 'model' => 'string|max:255',
                 'year' => 'integer|min:1900|max:' . (date('Y') + 1),
                 'description' => 'nullable|string',
             ]);
             $vehicle->update([
                 'name' => $request->name,
-                'brand' => $request->brand,
+                'brand_id' => $request->brand_id,
                 'model' => $request->model,
                 'year' => $request->year,
                 'description' => $request->description,
@@ -121,8 +135,12 @@ class VehicleController extends Controller
      */
     public function destroy(string $id)
     {
-        $vehicle = Vehicle::find($id);
-        $vehicle->delete();
-        return redirect()->route('admin.vehicles.index')->with('action', 'Vehículo eliminado correctamente.');
+        try{
+            $vehicle = Vehicle::find($id);
+            $vehicle->delete();
+            return redirect()->route('admin.vehicles.index')->with('action', 'Vehículo eliminado correctamente.');
+        } catch (Throwable $e){
+            return redirect()->route('admin.vehicles.index')->with('error', 'Error al eliminar el vehículo.');
+        }
     }
 }

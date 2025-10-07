@@ -6,7 +6,7 @@
         </div>
         <div class="form-group">
             {!! Form::label('brand', 'Marca') !!}
-            {!! Form::text('brand', null, ['class' => 'form-control', 'placeholder' => 'Marca del vehículo', 'required']) !!}
+            {!! Form::select('brand_id', $brands, null, ['class' => 'form-control', 'placeholder' => 'Seleccione una marca', 'required']) !!}
         </div>
         <div class="form-group">
             {!! Form::label('model', 'Modelo') !!}
